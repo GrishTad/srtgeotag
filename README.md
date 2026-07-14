@@ -47,8 +47,11 @@ srtgeotag DJI_0001.MP4 -o frames --fps 1 --format jpg
 # One frame every two seconds
 srtgeotag DJI_0001.MP4 -o frames --interval 2 --format png
 
-# Several files (each gets its own subdirectory)
+# Several files (all frames go into the same directory)
 srtgeotag DJI_0001.MP4 DJI_0002.MP4 -o frames --fps 0.5
+
+# Optionally use one named subdirectory per video
+srtgeotag DJI_0001.MP4 DJI_0002.MP4 -o frames --fps 0.5 --separate-directories
 
 # Every supported video in a directory
 srtgeotag ./flight -o frames --interval 5
@@ -75,8 +78,9 @@ print(telemetry[0].latitude, telemetry[0].longitude)
 ```
 
 `extract_video()` accepts `srt=...` for an explicitly named subtitle and `ffmpeg=...`
-for a custom executable path. `extract_videos()` uses a separate subdirectory for each
-video when processing a batch.
+for a custom executable path. By default, `extract_videos()` writes the entire batch
+into one directory and prefixes filenames with each video's stem. Pass
+`separate_directories=True` to create one named subdirectory per video.
 
 ## Telemetry mapping
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "srtgeotag"
-version = "0.1.0"
+version = "0.2.0"
 description = "Extract geotagged still frames from DJI videos and their SRT telemetry"
 readme = "README.md"
 requires-python = ">=3.9"

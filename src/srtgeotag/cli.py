@@ -65,8 +65,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--srt", help="explicit SRT path (only valid with one video)")
     parser.add_argument("--ffmpeg", default="ffmpeg", help="FFmpeg executable or path")
     parser.add_argument("--overwrite", action="store_true", help="replace existing frame files")
+    parser.add_argument(
+        "--separate-directories",
+        action="store_true",
+        help="put each video's frames in a separate named subdirectory",
+    )
     parser.add_argument("--no-progress", action="store_true", help="disable progress bars")
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.2.0")
     return parser
 
 
@@ -89,6 +94,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         results = extract_videos(
             videos, args.output, fps=fps, image_format=args.format, srt=args.srt,
             ffmpeg=args.ffmpeg, overwrite=args.overwrite, progress=progress,
+            separate_directories=args.separate_directories,
         )
     except (FileNotFoundError, FileExistsError, ValueError, RuntimeError) as exc:
         print(f"srtgeotag: error: {exc}", file=sys.stderr)

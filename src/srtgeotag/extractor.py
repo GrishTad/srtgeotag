@@ -59,6 +59,7 @@ def extract_video(
     ffmpeg: str = "ffmpeg",
     overwrite: bool = False,
     progress: Optional[ProgressCallback] = None,
+    filename_prefix: str = "",
 ) -> ExtractionResult:
     """Extract frames from one video and embed nearest-in-time SRT telemetry."""
     video_path = Path(video).expanduser().resolve()
@@ -120,7 +121,7 @@ def extract_video(
         generated = sorted(temp_dir.glob(f"*.{fmt}"))
         if not generated:
             raise RuntimeError(f"FFmpeg extracted no frames from {video_path.name}")
-        targets = [destination / frame.name for frame in generated]
+        targets = [destination / f"{filename_prefix}{frame.name}" for frame in generated]
         conflicts = [target for target in targets if target.exists()]
         if conflicts and not overwrite:
             raise FileExistsError(f"Output already exists: {conflicts[0]} (use overwrite=True)")
@@ -141,12 +142,26 @@ def extract_video(
 def extract_videos(
     videos: Iterable[PathLike],
     output_dir: PathLike,
+    *,
+    separate_directories: bool = False,
     **kwargs: object,
 ) -> List[ExtractionResult]:
-    """Extract one or many videos; batches get one output subdirectory per video."""
+    """Extract videos into one folder, or optionally one subdirectory per video."""
     paths = [Path(video) for video in videos]
     if not paths:
         raise ValueError("At least one video is required")
     root = Path(output_dir)
     multiple = len(paths) > 1
-    return [extract_video(video, root / video.stem if multiple else root, **kwargs) for video in paths]
+    prefix_counts = {}
+    results = []
+    for video in paths:
+        if multiple and not separate_directories:
+            key = video.stem.casefold()
+            prefix_counts[key] = prefix_counts.get(key, 0) + 1
+            duplicate_suffix = f"_{prefix_counts[key]}" if prefix_counts[key] > 1 else ""
+            prefix = f"{video.stem}{duplicate_suffix}_"
+        else:
+            prefix = ""
+        destination = root / video.stem if multiple and separate_directories else root
+        results.append(extract_video(video, destination, filename_prefix=prefix, **kwargs))
+    return results
